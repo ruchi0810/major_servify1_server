@@ -107,20 +107,22 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const userExist = await user.findOne({ email });
     if (!userExist) {
-      return res.status(400).json({ message: "user not exist" });
+      return res.status(400).json({ message: "User not exist" });
     }
+
+    // compare password with database password
     const isValidPassword = await bcrypt.compare(password, userExist.password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: "invaid email or password" });
+      return res.status(401).json({ message: "email or password invalid" });
     }
 
+    // checking login status by token
     const tokenExist = req.cookies.token;
-
     if (tokenExist) {
-      return res.status(400).json({ message: "already logged in" });
+      return res.status(400).json({ message: "Already login" });
     }
 
-    //j pass karavvu hoy ae and secret key
+    // generate token with user data and store in the cookie
     const token = Jwt.sign({ userId: userExist._id }, process.env.SECRET_KEY, {
       expiresIn: "1h",
     });
