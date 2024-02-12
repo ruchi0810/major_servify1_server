@@ -53,6 +53,11 @@ export const update = async (req, res) => {
     if (!userExist) {
       return res.status(404).json({ msg: "user data not found" });
     }
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      req.body.password = hashedPassword;
+    }
     const updatedData = await user.findByIdAndUpdate(id, req.body, {
       new: true,
     });
@@ -115,21 +120,59 @@ export const login = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({ message: "email or password invalid" });
     }
+    const cookies = req.cookies;
 
-    // checking login status by token
-    const tokenExist = req.cookies.token;
+    const tokenExist = cookies.token;
+
     if (tokenExist) {
-      return res.status(400).json({ message: "Already login" });
+      return res.status(400).json({ message: "Alreay logged in" });
     }
 
-    // generate token with user data and store in the cookie
     const token = Jwt.sign({ userId: userExist._id }, process.env.SECRET_KEY, {
       expiresIn: "1h",
     });
-    res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 3600000,
+    });
+
     res.status(200).json({ message: "Login successfully" });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+export const logout = async (req, res) => {
+  try {
+    const tokenExist = req.cookies.token;
+
+    if (!tokenExist) {
+      return res.status(400).json({ message: "login required" });
+    }
+    res.clearCookie("token");
+    res.status(200).json({ message: "logout successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+export const updatewithlogintoken = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const userExist = await user.findById(id);
+    if (!userExist) {
+      return res.status(404).json({ msg: "user data not found" });
+    }
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      req.body.password = hashedPassword;
+    }
+    const updatedData = await user.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json(updatedData);
+  } catch (error) {
     res.status(500).json({ error: error });
   }
 };

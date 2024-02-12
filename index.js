@@ -50,6 +50,8 @@ const io = new Server(server); // Attach Socket.IO to the HTTP server
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.json()); // Add this line to parse incoming JSON requests
+app.use(express.urlencoded({ extended: true })); // Add this line to parse incoming form data
 app.use(cors());
 dotenv.config();
 
@@ -81,3 +83,8 @@ io.on("connection", (socket) => {
 app.use("/api/users", userRoute);
 app.use("/api/service-providers", serviceProviderRoute);
 app.use("/api/reviews", reviewRoute);
+app.get("/test-cookie", (req, res) => {
+  const tokenExist = req.cookies.token;
+  console.log("Token from cookies:", tokenExist);
+  res.json({ tokenExist });
+});
