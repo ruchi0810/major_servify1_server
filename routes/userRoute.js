@@ -20,7 +20,7 @@ route.get("/login", login);
 route.get("/getall", getAll);
 route.get("/getone/:id", getOne);
 route.put("/update/:id", update);
-route.put("/updatewithlogintoken/:id", authMiddleware, update);
+route.put("/updatewithlogintoken/:id", authMiddleware, updatewithlogintoken);
 route.delete("/delete/:id", deleteUser);
 
 export default route;

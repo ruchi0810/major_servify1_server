@@ -3,6 +3,7 @@ import user from "../model/userModel.js";
 import Review from "../model/reviewModel.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import AllDeletedServiceProvider from "../model/allDeletedServiceProviderModel.js";
 
 export const create = async (req, res) => {
   try {
@@ -70,6 +71,8 @@ export const update = async (req, res) => {
     //     },
     //   }
     // );
+    // Call a function to update AllDeletedServiceProvider collection
+    await updateAllDeletedServiceProvider(id, req.body);
     res.status(200).json(updatedData);
   } catch (error) {
     res.status(500).json({ error: error });
@@ -174,5 +177,29 @@ export const updatewithlogintoken = async (req, res) => {
     res.status(200).json(updatedData);
   } catch (error) {
     res.status(500).json({ error: error });
+  }
+};
+
+//when userdata updated it automatically update in deletedallserviceprovider collection
+const updateAllDeletedServiceProvider = async (userId, updatedUserData) => {
+  try {
+    // Find entries in AllDeletedServiceProvider with the specified userId
+    const entriesToUpdate = await AllDeletedServiceProvider.find({
+      "reviews.userId._id": userId,
+    });
+
+    // Update user information in each entry
+    for (const entry of entriesToUpdate) {
+      entry.reviews.forEach((review) => {
+        if (review.userId._id.toString() === userId) {
+          review.userId.name = updatedUserData.name;
+          review.userId.mobile = updatedUserData.mobile;
+        }
+      });
+
+      await entry.save();
+    }
+  } catch (error) {
+    console.error("Error updating AllDeletedServiceProvider:", error);
   }
 };
