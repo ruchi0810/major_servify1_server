@@ -83,8 +83,3 @@ io.on("connection", (socket) => {
 app.use("/api/users", userRoute);
 app.use("/api/service-providers", serviceProviderRoute);
 app.use("/api/reviews", reviewRoute);
-app.get("/test-cookie", (req, res) => {
-  const tokenExist = req.cookies.token;
-  console.log("Token from cookies:", tokenExist);
-  res.json({ tokenExist });
-});
