@@ -20,6 +20,7 @@ route.delete("/delete/:id", deleteServiceProvider);
 route.post("/search", SearchServiceProvider_byservice);
 route.get("/getallquery/:serviceName", getServiceProviderByServiceName);
 route.post("/:id/reviews", addReviewToServiceProvider);
+
 route.get(
   "/:serviceProviderId/reviews/:userId",
   getReviewsByServiceProviderAndUser

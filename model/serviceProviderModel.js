@@ -25,6 +25,7 @@ const serviceProviderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
   spemail: {
     type: String,
     required: true,
@@ -46,6 +47,10 @@ const serviceProviderSchema = new mongoose.Schema({
       },
       message: "password must be greter than 6 character",
     },
+  },
+  overallRating: {
+    type: Number,
+    default: 0,
   },
   reviews: [
     {
