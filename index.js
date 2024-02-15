@@ -1,24 +1,82 @@
+// // import express from "express";
+// // import mongoose from "mongoose";
+// // import bodyParser from "body-parser";
+// // import dotenv from "dotenv";
+// // import cors from "cors";
+// // import http from "http"; // Import the http module
+// // import { Server } from "socket.io"; // Import the Server class from socket.io
+// // import userRoute from "./routes/userRoute.js";
+// // import serviceProviderRoute from "./routes/serviceProviderRoute.js";
+// // import reviewRoute from "./routes/reviewRoute.js";
+// // import cookieParser from "cookie-parser";
+
+// // const app = express();
+// // const server = http.createServer(app); // Create an HTTP server
+// // const io = new Server(server); // Attach Socket.IO to the HTTP server
+
+// // app.use(bodyParser.json());
+// // app.use(cookieParser());
+// // app.use(express.json()); // Add this line to parse incoming JSON requests
+// // app.use(express.urlencoded({ extended: true })); // Add this line to parse incoming form data
+// // app.use(cors());
+// // dotenv.config();
+
+// // const PORT = process.env.PORT || 7000;
+// // const URL = process.env.MONGOURL;
+
+// // mongoose
+// //   .connect(URL)
+// //   .then(() => {
+// //     console.log("DB connected successfully");
+
+// //     server.listen(PORT, () => {
+// //       console.log(`Server is running on port ${PORT}`);
+// //     });
+// //   })
+// //   .catch((error) => console.log(error));
+
+// // // WebSocket connection handling
+// // io.on("connection", (socket) => {
+// //   console.log("A user connected");
+
+// //   // Add your WebSocket event handlers here
+
+// //   socket.on("disconnect", () => {
+// //     console.log("User disconnected");
+// //   });
+// // });
+
+// // app.use("/api/users", userRoute);
+// // app.use("/api/service-providers", serviceProviderRoute);
+// // app.use("/api/reviews", reviewRoute);
+
 // import express from "express";
 // import mongoose from "mongoose";
 // import bodyParser from "body-parser";
 // import dotenv from "dotenv";
 // import cors from "cors";
-// import http from "http"; // Import the http module
-// import { Server } from "socket.io"; // Import the Server class from socket.io
+// import http from "http";
+// import { Server } from "socket.io";
 // import userRoute from "./routes/userRoute.js";
 // import serviceProviderRoute from "./routes/serviceProviderRoute.js";
 // import reviewRoute from "./routes/reviewRoute.js";
 // import cookieParser from "cookie-parser";
 
 // const app = express();
-// const server = http.createServer(app); // Create an HTTP server
-// const io = new Server(server); // Attach Socket.IO to the HTTP server
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:3000", // Replace with your React app's origin
+//     methods: ["GET", "POST"],
+//   },
+// });
 
 // app.use(bodyParser.json());
 // app.use(cookieParser());
-// app.use(express.json()); // Add this line to parse incoming JSON requests
-// app.use(express.urlencoded({ extended: true })); // Add this line to parse incoming form data
-// app.use(cors());
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cors({ credentials: true, origin: "http://localhost:3000" })); // CORS middleware
+
 // dotenv.config();
 
 // const PORT = process.env.PORT || 7000;
@@ -37,12 +95,12 @@
 
 // // WebSocket connection handling
 // io.on("connection", (socket) => {
-//   console.log("A user connected");
+//   //console.log("A user connected");
 
 //   // Add your WebSocket event handlers here
 
 //   socket.on("disconnect", () => {
-//     console.log("User disconnected");
+//     //console.log("User disconnected");
 //   });
 // });
 
@@ -50,33 +108,29 @@
 // app.use("/api/service-providers", serviceProviderRoute);
 // app.use("/api/reviews", reviewRoute);
 
+//2nd tryyyyyyyyyyyyyyyyy
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import cors from "cors";
-import http from "http";
-import { Server } from "socket.io";
+import http from "http"; // Import the http module
+import { Server } from "socket.io"; // Import the Server class from socket.io
 import userRoute from "./routes/userRoute.js";
 import serviceProviderRoute from "./routes/serviceProviderRoute.js";
 import reviewRoute from "./routes/reviewRoute.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000", // Replace with your React app's origin
-    methods: ["GET", "POST"],
-  },
-});
+const server = http.createServer(app); // Create an HTTP server
+const io = new Server(server); // Attach Socket.IO to the HTTP server
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({ credentials: true, origin: "http://localhost:3000" })); // CORS middleware
-
+app.use(express.json()); // Add this line to parse incoming JSON requests
+app.use(express.urlencoded({ extended: true })); // Add this line to parse incoming form data
+app.use(cors());
+// app.use(cors({ credentials: true, origin: "http://localhost:3000" })); // CORS middleware
 dotenv.config();
 
 const PORT = process.env.PORT || 7000;
@@ -95,12 +149,12 @@ mongoose
 
 // WebSocket connection handling
 io.on("connection", (socket) => {
-  //console.log("A user connected");
+  console.log("A user connected");
 
   // Add your WebSocket event handlers here
 
   socket.on("disconnect", () => {
-    //console.log("User disconnected");
+    console.log("User disconnected");
   });
 });
 

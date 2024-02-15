@@ -185,35 +185,16 @@ export const getServiceProviderByServiceName = async (req, res) => {
 // export const addReviewToServiceProvider = async (req, res) => {
 //   try {
 //     const serviceProviderId = req.params.id;
-//     const userId = req.body.userId;
-
-//     // Check if the user has already given a review to this service provider
-//     const existingReview = await Review.findOne({
-//       serviceProviderId,
-//       userId,
-//     });
-
-//     if (existingReview) {
-//       return res.status(400).json({
-//         msg: "User has already given a review to this service provider",
-//       });
-//     }
 
 //     const serviceProvider = await ServiceProvider.findById(serviceProviderId);
 //     if (!serviceProvider) {
 //       return res.status(404).json({ msg: "Service provider not found" });
 //     }
-
 //     const reviewData = req.body;
+//     const userId = new mongoose.Types.ObjectId(reviewData.userId); // Convert userId to ObjectId
+//     // console.log("Received review data:", reviewData); // Add this line
 
-//     // Convert userId to ObjectId
-//     const userObjectId = new mongoose.Types.ObjectId(userId);
-
-//     const review = new Review({
-//       ...reviewData,
-//       serviceProviderId,
-//       userId: userObjectId,
-//     });
+//     const review = new Review({ ...reviewData, serviceProviderId });
 //     const savedReview = await review.save();
 
 //     const updatedServiceProvider = await ServiceProvider.findByIdAndUpdate(
@@ -222,11 +203,60 @@ export const getServiceProviderByServiceName = async (req, res) => {
 //       { new: true }
 //     );
 
+//     // console.log("Updated serviceProvider data:", serviceProvider); // Add this line
+
 //     res.status(200).json(savedReview);
 //   } catch (error) {
+//     // console.error("Error in addReviewToServiceProvider:", error); // Add this line
 //     res.status(500).json({ error: error.message });
 //   }
 // };
+
+export const addReviewToServiceProvider = async (req, res) => {
+  try {
+    const serviceProviderId = req.params.id;
+    const userId = req.body.userId;
+
+    // Check if the user has already given a review to this service provider
+    const existingReview = await Review.findOne({
+      serviceProviderId,
+      userId,
+    });
+
+    if (existingReview) {
+      return res.status(400).json({
+        msg: "User has already given a review to this service provider",
+      });
+    }
+
+    const serviceProvider = await ServiceProvider.findById(serviceProviderId);
+    if (!serviceProvider) {
+      return res.status(404).json({ msg: "Service provider not found" });
+    }
+
+    const reviewData = req.body;
+
+    // Convert userId to ObjectId
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const review = new Review({
+      ...reviewData,
+      serviceProviderId,
+      userId: userObjectId,
+    });
+    const savedReview = await review.save();
+
+    const updatedServiceProvider = await ServiceProvider.findByIdAndUpdate(
+      serviceProviderId,
+      { $push: { reviews: savedReview._id } },
+      { new: true }
+    );
+
+    res.status(200).json(savedReview);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 // POST localhost:8000/api/service-providers/SP_ID/reviews
 
 // {
@@ -278,62 +308,3 @@ export const getReviewsByServiceProviderAndUser = async (req, res) => {
   }
 };
 //GET http://localhost:8000/api/service-providers/SP_ID/reviews/USER_ID
-
-//for overall rating of service provider
-// Update addReviewToServiceProvider controller
-
-export const addReviewToServiceProvider = async (req, res) => {
-  try {
-    const serviceProviderId = req.params.id;
-    const userId = req.body.userId;
-
-    // Check if the user has already given a review to this service provider
-    const existingReview = await Review.findOne({
-      serviceProviderId,
-      userId,
-    });
-
-    if (existingReview) {
-      return res.status(400).json({
-        msg: "User has already given a review to this service provider",
-      });
-    }
-
-    const serviceProvider = await ServiceProvider.findById(serviceProviderId);
-    if (!serviceProvider) {
-      return res.status(404).json({ msg: "Service provider not found" });
-    }
-
-    const reviewData = req.body;
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-
-    const review = new Review({
-      ...reviewData,
-      serviceProviderId,
-      userId: userObjectId,
-    });
-
-    const savedReview = await review.save();
-
-    // Calculate the new overall rating
-    const existingReviews = await Review.find({ serviceProviderId });
-
-    // Sum up all ratings, including the new one, with half-star increments
-    const totalRating = existingReviews.reduce(
-      (sum, review) => sum + review.rating,
-      savedReview.rating
-    );
-
-    // Update the overall rating in the service provider model
-    const newOverallRating =
-      Math.round((totalRating / (existingReviews.length + 1)) * 2) / 2;
-
-    await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
-      overallRating: newOverallRating,
-    });
-
-    res.status(200).json(savedReview);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};

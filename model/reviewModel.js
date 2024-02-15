@@ -13,11 +13,11 @@ const reviewSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
-    required: false,
+    required: true,
   },
   reviews: {
     type: String,
-    required: false,
+    required: true,
   },
 });
 

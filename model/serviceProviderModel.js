@@ -48,10 +48,6 @@ const serviceProviderSchema = new mongoose.Schema({
       message: "password must be greter than 6 character",
     },
   },
-  overallRating: {
-    type: Number,
-    default: 0,
-  },
   reviews: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -3,7 +3,6 @@ import user from "../model/userModel.js";
 import Review from "../model/reviewModel.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import AllDeletedServiceProvider from "../model/allDeletedServiceProviderModel.js";
 
 export const create = async (req, res) => {
   try {
@@ -71,8 +70,6 @@ export const update = async (req, res) => {
     //     },
     //   }
     // );
-    // Call a function to update AllDeletedServiceProvider collection
-    await updateAllDeletedServiceProvider(id, req.body);
     res.status(200).json(updatedData);
   } catch (error) {
     res.status(500).json({ error: error });
