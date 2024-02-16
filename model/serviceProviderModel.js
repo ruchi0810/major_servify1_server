@@ -55,12 +55,12 @@ const serviceProviderSchema = new mongoose.Schema({
       ref: "Review",
     },
   ],
-  // ratings: [
-  //   {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Rating",
-  //   },
-  // ],
+  ratings: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rating",
+    },
+  ],
   overallRating: {
     type: Number,
     default: 0,

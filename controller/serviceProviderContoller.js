@@ -252,22 +252,22 @@ export const addReviewToServiceProvider = async (req, res) => {
       { $push: { reviews: savedReview._id } },
       { new: true }
     );
-    // Calculate the new overall rating
-    const existingReviews = await Review.find({ serviceProviderId });
+    // // Calculate the new overall rating
+    // const existingReviews = await Review.find({ serviceProviderId });
 
-    // Sum up all ratings, including the new one, with half-star increments
-    const totalRating = existingReviews.reduce(
-      (sum, review) => sum + review.rating,
-      savedReview.rating
-    );
+    // // Sum up all ratings, including the new one, with half-star increments
+    // const totalRating = existingReviews.reduce(
+    //   (sum, review) => sum + review.rating,
+    //   savedReview.rating
+    // );
 
-    // Update the overall rating in the service provider model
-    const newOverallRating =
-      Math.round((totalRating / (existingReviews.length + 1)) * 2) / 2;
+    // // Update the overall rating in the service provider model
+    // const newOverallRating =
+    //   Math.round((totalRating / (existingReviews.length + 1)) * 2) / 2;
 
-    await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
-      overallRating: newOverallRating,
-    });
+    // await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
+    //   overallRating: newOverallRating,
+    // });
 
     res.status(200).json(savedReview);
   } catch (error) {
@@ -282,7 +282,6 @@ export const addReviewToServiceProvider = async (req, res) => {
 //   "comment": "Great service!"
 // }
 
-// Add rating to service provider not workingggggggggggg
 export const addRatingToServiceProvider = async (req, res) => {
   try {
     const serviceProviderId = req.params.id;
@@ -319,6 +318,23 @@ export const addRatingToServiceProvider = async (req, res) => {
       { $push: { ratings: savedRating._id } },
       { new: true }
     );
+
+    // Calculate the new overall rating
+    const existingRatings = await Rating.find({ serviceProviderId });
+
+    // Sum up all ratings, including the new one, with half-star increments
+    const totalRating = existingRatings.reduce(
+      (sum, rating) => sum + rating.rating,
+      savedRating.rating
+    );
+
+    // Update the overall rating in the service provider model
+    const newOverallRating =
+      Math.round((totalRating / (existingRatings.length + 1)) * 2) / 2;
+
+    await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
+      overallRating: newOverallRating,
+    });
 
     res.status(200).json(savedRating);
   } catch (error) {
