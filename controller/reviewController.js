@@ -1,11 +1,13 @@
 import Review from "../model/reviewModel.js";
 import ServiceProvider from "../model/serviceProviderModel.js";
+import { io } from "../index.js";
 
 export const createReview = async (req, res) => {
   try {
     const reviewData = new Review(req.body);
     const savedData = await reviewData.save();
     io.emit("newReview", savedData);
+    console.log("Emitted newReview event");
     res.status(200).json(savedData);
   } catch (error) {
     res.status(500).json({ error: error.message });
