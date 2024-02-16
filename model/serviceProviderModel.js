@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Review from "../model/reviewModel.js"; // Import the Review model
+import Rating from "../model/ratingModel.js";
 import ServiceProvider from "../model/serviceProviderModel.js";
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
@@ -54,6 +55,16 @@ const serviceProviderSchema = new mongoose.Schema({
       ref: "Review",
     },
   ],
+  // ratings: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Rating",
+  //   },
+  // ],
+  overallRating: {
+    type: Number,
+    default: 0,
+  },
 });
 serviceProviderSchema.pre("findOneAndDelete", async function (next) {
   const serviceProviderId = this._conditions._id;

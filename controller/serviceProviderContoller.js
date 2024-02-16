@@ -1,5 +1,6 @@
 import ServiceProvider from "../model/serviceProviderModel.js";
 import Review from "../model/reviewModel.js";
+import Rating from "../model/ratingModel.js";
 import User from "../model/userModel.js";
 import mongoose from "mongoose"; // Import mongoose
 import AllDeletedServiceProvider from "../model/allDeletedServiceProviderModel.js";
@@ -251,6 +252,22 @@ export const addReviewToServiceProvider = async (req, res) => {
       { $push: { reviews: savedReview._id } },
       { new: true }
     );
+    // Calculate the new overall rating
+    const existingReviews = await Review.find({ serviceProviderId });
+
+    // Sum up all ratings, including the new one, with half-star increments
+    const totalRating = existingReviews.reduce(
+      (sum, review) => sum + review.rating,
+      savedReview.rating
+    );
+
+    // Update the overall rating in the service provider model
+    const newOverallRating =
+      Math.round((totalRating / (existingReviews.length + 1)) * 2) / 2;
+
+    await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
+      overallRating: newOverallRating,
+    });
 
     res.status(200).json(savedReview);
   } catch (error) {
@@ -264,6 +281,50 @@ export const addReviewToServiceProvider = async (req, res) => {
 //   "rating": 5,
 //   "comment": "Great service!"
 // }
+
+// Add rating to service provider not workingggggggggggg
+export const addRatingToServiceProvider = async (req, res) => {
+  try {
+    const serviceProviderId = req.params.id;
+    const userId = req.body.userId;
+    const ratingValue = req.body.rating;
+
+    // Check if the user has already given a rating to this service provider
+    const existingRating = await Rating.findOne({
+      serviceProviderId,
+      userId,
+    });
+
+    if (existingRating) {
+      return res.status(400).json({
+        msg: "User has already given a rating to this service provider",
+      });
+    }
+
+    const serviceProvider = await ServiceProvider.findById(serviceProviderId);
+    if (!serviceProvider) {
+      return res.status(404).json({ msg: "Service provider not found" });
+    }
+
+    const rating = new Rating({
+      serviceProviderId,
+      userId,
+      rating: ratingValue,
+    });
+
+    const savedRating = await rating.save();
+
+    const updatedServiceProvider = await ServiceProvider.findByIdAndUpdate(
+      serviceProviderId,
+      { $push: { ratings: savedRating._id } },
+      { new: true }
+    );
+
+    res.status(200).json(savedRating);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const getReviewsByServiceProviderAndUser = async (req, res) => {
   try {

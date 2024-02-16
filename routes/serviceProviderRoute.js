@@ -7,6 +7,7 @@ import {
   updateServiceProvider,
   SearchServiceProvider_byservice,
   addReviewToServiceProvider,
+  addRatingToServiceProvider,
   getServiceProviderByServiceName,
   getReviewsByServiceProviderAndUser,
 } from "../controller/serviceProviderContoller.js";
@@ -20,6 +21,7 @@ route.delete("/delete/:id", deleteServiceProvider);
 route.post("/search", SearchServiceProvider_byservice);
 route.get("/getallquery/:serviceName", getServiceProviderByServiceName);
 route.post("/:id/reviews", addReviewToServiceProvider);
+route.post("/:id/rating", addRatingToServiceProvider);
 
 route.get(
   "/:serviceProviderId/reviews/:userId",
