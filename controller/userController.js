@@ -4,9 +4,32 @@ import Review from "../model/reviewModel.js";
 import Jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+// export const create = async (req, res) => {
+//   try {
+//     const userData = new user(req.body);
+//     if (!userData) {
+//       return res.status(404).json({ msg: "user data not found" });
+//     }
+
+//     const savedData = await userData.save();
+//     res.status(200).json(savedData);
+//   } catch (error) {
+//     res.status(500).json({ error: error });
+//   }
+// };
 export const create = async (req, res) => {
   try {
-    const userData = new user(req.body);
+    const { password, ...userDataWithoutPassword } = req.body;
+
+    // Manually hash the password before creating the user
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const userData = new user({
+      ...userDataWithoutPassword,
+      password: hashedPassword,
+    });
+
     if (!userData) {
       return res.status(404).json({ msg: "user data not found" });
     }
@@ -136,6 +159,8 @@ export const login = async (req, res) => {
       httpOnly: true,
       maxAge: 3600000,
     });
+    console.log("Provided Password:", password);
+    console.log("Hashed Password from DB:", userExist.password);
 
     res.status(200).json({ message: "Login successfully" });
   } catch (error) {
@@ -198,5 +223,30 @@ const updateAllDeletedServiceProvider = async (userId, updatedUserData) => {
     }
   } catch (error) {
     console.error("Error updating AllDeletedServiceProvider:", error);
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Check if the email exists in the user collection
+    const existingUser = await user.findOne({ email });
+
+    if (!existingUser) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // Generate a new hashed password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user's password in the database
+    existingUser.password = hashedPassword;
+    await existingUser.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

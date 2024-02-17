@@ -178,6 +178,7 @@ import { Server } from "socket.io"; // Import the Server class from socket.io
 import userRoute from "./routes/userRoute.js";
 import serviceProviderRoute from "./routes/serviceProviderRoute.js";
 import reviewRoute from "./routes/reviewRoute.js";
+import check_user_is_providerRoute from "./routes/check_user_is_provider_Route.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -227,3 +228,4 @@ export { io };
 app.use("/api/users", userRoute);
 app.use("/api/service-providers", serviceProviderRoute);
 app.use("/api/reviews", reviewRoute);
+app.use("/api/check", check_user_is_providerRoute);

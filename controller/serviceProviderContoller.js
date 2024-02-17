@@ -252,22 +252,6 @@ export const addReviewToServiceProvider = async (req, res) => {
       { $push: { reviews: savedReview._id } },
       { new: true }
     );
-    // // Calculate the new overall rating
-    // const existingReviews = await Review.find({ serviceProviderId });
-
-    // // Sum up all ratings, including the new one, with half-star increments
-    // const totalRating = existingReviews.reduce(
-    //   (sum, review) => sum + review.rating,
-    //   savedReview.rating
-    // );
-
-    // // Update the overall rating in the service provider model
-    // const newOverallRating =
-    //   Math.round((totalRating / (existingReviews.length + 1)) * 2) / 2;
-
-    // await ServiceProvider.findByIdAndUpdate(serviceProviderId, {
-    //   overallRating: newOverallRating,
-    // });
 
     res.status(200).json(savedReview);
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   login,
   logout,
   updatewithlogintoken,
+  forgotPassword,
 } from "../controller/userController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const route = express.Router();
@@ -22,5 +23,6 @@ route.get("/getone/:id", getOne);
 route.put("/update/:id", update);
 route.put("/updatewithlogintoken/:id", authMiddleware, updatewithlogintoken);
 route.delete("/delete/:id", deleteUser);
+route.post("/forgotpassword", forgotPassword);
 
 export default route;
