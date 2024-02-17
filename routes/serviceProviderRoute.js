@@ -10,7 +10,13 @@ import {
   addRatingToServiceProvider,
   getServiceProviderByServiceName,
   getReviewsByServiceProviderAndUser,
+  login,
+  logout,
+  signup,
+  forgotPassword,
+  updatewithlogintoken,
 } from "../controller/serviceProviderContoller.js";
+import { authMiddleware_sp } from "../middleware/authMiddleware_sp.js";
 const route = express.Router();
 
 route.post("/create", createServiceProvider);
@@ -22,6 +28,12 @@ route.post("/search", SearchServiceProvider_byservice);
 route.get("/getallquery/:serviceName", getServiceProviderByServiceName);
 route.post("/:id/reviews", addReviewToServiceProvider);
 route.post("/:id/ratings", addRatingToServiceProvider);
+
+route.post("/signup", signup);
+route.get("/logout", logout);
+route.get("/login", login);
+route.post("/forgotpassword", forgotPassword);
+route.put("/updatewithlogintoken/:id", authMiddleware_sp, updatewithlogintoken);
 
 route.get(
   "/:serviceProviderId/reviews/:userId",

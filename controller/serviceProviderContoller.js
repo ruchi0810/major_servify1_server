@@ -2,14 +2,39 @@ import ServiceProvider from "../model/serviceProviderModel.js";
 import Review from "../model/reviewModel.js";
 import Rating from "../model/ratingModel.js";
 import User from "../model/userModel.js";
+import Jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import mongoose from "mongoose"; // Import mongoose
 import AllDeletedServiceProvider from "../model/allDeletedServiceProviderModel.js";
 
+// export const createServiceProvider = async (req, res) => {
+//   try {
+//     const serviceProviderData = new ServiceProvider(req.body);
+//     if (!serviceProviderData) {
+//       return res.status(404).json({ msg: "Service provider data not found" });
+//     }
+
+//     const savedData = await serviceProviderData.save();
+//     res.status(200).json(savedData);
+//   } catch (error) {
+//     res.status(500).json({ error: error });
+//   }
+// };
 export const createServiceProvider = async (req, res) => {
   try {
-    const serviceProviderData = new ServiceProvider(req.body);
+    const { sppassword, ...serviceProviderDataWithoutPassword } = req.body;
+
+    // Manually hash the password before creating the user
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(sppassword, salt);
+
+    const serviceProviderData = new ServiceProvider({
+      ...serviceProviderDataWithoutPassword,
+      sppassword: hashedPassword,
+    });
+
     if (!serviceProviderData) {
-      return res.status(404).json({ msg: "Service provider data not found" });
+      return res.status(404).json({ msg: "user data not found" });
     }
 
     const savedData = await serviceProviderData.save();
@@ -369,3 +394,135 @@ export const getReviewsByServiceProviderAndUser = async (req, res) => {
   }
 };
 //GET http://localhost:8000/api/service-providers/SP_ID/reviews/USER_ID
+
+export const signup = async (req, res) => {
+  try {
+    const { spemail, sppassword, ...otherData } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await ServiceProvider.findOne({ spemail });
+    if (existingUser) {
+      return res.status(400).json({ msg: "Sp already exists" });
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(sppassword, salt);
+
+    // Create a new user instance with hashed password
+    const newUser = new ServiceProvider({
+      spemail,
+      sppassword: hashedPassword,
+      ...otherData,
+    });
+
+    // Save the new user to the database
+    const savedUser = await newUser.save();
+
+    res.status(200).json(savedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+export const login = async (req, res) => {
+  try {
+    const { spemail, sppassword } = req.body;
+    const userExist = await ServiceProvider.findOne({ spemail });
+    if (!userExist) {
+      return res.status(400).json({ message: "serviceprovider not exist" });
+    }
+
+    // compare password with database password
+    const isValidPassword = await bcrypt.compare(
+      sppassword,
+      userExist.sppassword
+    );
+    if (!isValidPassword) {
+      return res.status(401).json({ message: "email or password invalid" });
+    }
+    const cookies = req.cookies;
+
+    const tokenExist = cookies.token;
+
+    if (tokenExist) {
+      return res.status(400).json({ message: "Alreay logged in" });
+    }
+
+    const token = Jwt.sign(
+      { serviceProviderId: userExist._id },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 3600000,
+    });
+
+    res.status(200).json({ message: "Login successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+export const logout = async (req, res) => {
+  try {
+    const tokenExist = req.cookies.token;
+
+    if (!tokenExist) {
+      return res.status(400).json({ message: "login required" });
+    }
+    res.clearCookie("token");
+    res.status(200).json({ message: "logout successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+
+export const updatewithlogintoken = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const userExist = await ServiceProvider.findById(id);
+    if (!userExist) {
+      return res.status(404).json({ msg: "serviceProvider data not found" });
+    }
+    if (req.body.sppassword) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.sppassword, salt);
+      req.body.sppassword = hashedPassword;
+    }
+    const updatedData = await ServiceProvider.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json(updatedData);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { spemail, newPassword } = req.body;
+
+    // Check if the email exists in the user collection
+    const existingUser = await ServiceProvider.findOne({ spemail });
+
+    if (!existingUser) {
+      return res.status(404).json({ msg: "SP not found" });
+    }
+
+    // Generate a new hashed password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user's password in the database
+    existingUser.sppassword = hashedPassword;
+    await existingUser.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

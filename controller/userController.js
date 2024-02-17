@@ -115,21 +115,52 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+// export const signup = async (req, res) => {
+//   try {
+//     const userData = new user(req.body);
+//     const { email } = userData;
+//     const existUser = await user.findOne({ email });
+//     if (existUser) {
+//       return res.status(400).json({ msg: "user already exist" });
+//     }
+
+//     const savedData = await userData.save();
+//     res.status(200).json(savedData);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 export const signup = async (req, res) => {
   try {
-    const userData = new user(req.body);
-    const { email } = userData;
-    const existUser = await user.findOne({ email });
-    if (existUser) {
-      return res.status(400).json({ msg: "user already exist" });
+    const { email, password, ...otherData } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await user.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: "User already exists" });
     }
 
-    const savedData = await userData.save();
-    res.status(200).json(savedData);
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create a new user instance with hashed password
+    const newUser = new user({
+      email,
+      password: hashedPassword,
+      ...otherData,
+    });
+
+    // Save the new user to the database
+    const savedUser = await newUser.save();
+
+    res.status(200).json(savedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -159,8 +190,6 @@ export const login = async (req, res) => {
       httpOnly: true,
       maxAge: 3600000,
     });
-    console.log("Provided Password:", password);
-    console.log("Hashed Password from DB:", userExist.password);
 
     res.status(200).json({ message: "Login successfully" });
   } catch (error) {

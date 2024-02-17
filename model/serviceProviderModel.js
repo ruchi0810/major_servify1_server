@@ -80,7 +80,7 @@ serviceProviderSchema.pre("save", async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(serviceprovider.sppassword, salt);
-    serviceprovider.sppassword = hashedPassword;
+    //serviceprovider.sppassword = hashedPassword;
     next();
   } catch (error) {
     console.log(error);
